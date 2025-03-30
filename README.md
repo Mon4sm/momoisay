@@ -14,13 +14,13 @@
 
 ### Linux
 ```bash
-git clone https://github.com/Mon4sm/momoisay.git
+git clone https://github.com/Mon4sm/Momoisay.git
 cd Momoisay
 sudo sh ./install/linux.sh
 ```
 ### MacOS
 ```bash
-git clone https://github.com/Mon4sm/momoisay.git
+git clone https://github.com/Mon4sm/Momoisay.git
 cd Momoisay
 sudo sh ./install/mac.sh
 ```

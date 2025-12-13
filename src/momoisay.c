@@ -1,9 +1,9 @@
+#define _DEFAULT_SOURCE
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#include <signal.h>
 #include <ncurses.h>
 #include <getopt.h>
 #include <locale.h>
@@ -27,7 +27,7 @@
 #define ANIMATED_VERSION 3
 #define MAX_LENGTH 30
 
-void init(){
+static void init(){
     setlocale(LC_ALL,"");
     initscr();
     cbreak();
@@ -37,7 +37,7 @@ void init(){
     timeout(-1);
 }
 
-void help(){
+static void help(){
     printf(
         "Make cute Momoi from Blue Archive say something!!!\n"
         "operations:\n"
@@ -70,15 +70,15 @@ int stoi(char *s){
     return num;
 }
 
-int randomizer(int min, int max){
+static int randomizer(int min, int max){
     return rand()%(max-min+1)+min;
 }
 
-int randint(const int arr[],int size){
+static int randint(const int arr[],int size){
     return arr[rand()%size];
 }
 
-int get_line(char *argv[],int start,int end){
+static int get_line(char *argv[],int start,int end){
     int lines = 0,cnt = 0;
     if(end-start)lines++;
     for(int i=start;i<end;i++){
@@ -94,7 +94,7 @@ int get_line(char *argv[],int start,int end){
     return lines;
 }
 
-char** create_canvas(int x,int y){
+static char** create_canvas(int x,int y){
     char **canvas = (char **)malloc(x*sizeof(char *));
     for(int i=0;i<x;i++){
         canvas[i] = (char *)calloc(y+1,sizeof(char));
@@ -102,14 +102,14 @@ char** create_canvas(int x,int y){
     return canvas;
 }
 
-void print_canvas(char **canvas,int x,int px,int py){
+static void print_canvas(char **canvas,int x,int px,int py){
     for(int i=0;i<x;i++){
         mvprintw(py+i,px,"%s",canvas[i]);
     }
     refresh();
 }
 
-void free_canvas(char **canvas,int x){
+static void free_canvas(char **canvas,int x){
     if(canvas == NULL)return;
     for(int i=0;i<x;i++){
         free(canvas[i]);
@@ -117,19 +117,26 @@ void free_canvas(char **canvas,int x){
     free(canvas);
 }
 
-int textlen(char *argv[],int start,int end){
+static int textlen(char *argv[],int start,int end){
     int length = 0;
     for(int i=start;i<end;i++)length+=strlen(argv[i])+1;
     if(length-1>MAX_LENGTH)return MAX_LENGTH;
     return length-1;
 }
 
-void construct_v1(const char **art[],char *argv[],int *intervals,int frames,int x,int y,int ry,int length,int lines,int start,int end,int round){
+static void construct_v1(const char **art[],char *argv[],int *intervals,int frames,int x,int y,int ry,int length,int lines,int start,int end,int round){
     int current_frame = 0;
     while(round!=0){
+        nodelay(stdscr, TRUE);
+        int ch = getch();
+        if (ch == 113 || ch == 81) {
+            endwin();
+            exit(0);
+        }
         int cnt = 0,pt1=(x+1)/2,pt2=((x+1)/2)+1,pts=3+y,ptt=pts;
         char **canvas = create_canvas(x,y+length);
-        clear();
+        erase();
+
         int terminal_height = LINES;
         int terminal_width = COLS;
         int px = (terminal_width-ry-length)/2;
@@ -189,12 +196,18 @@ void construct_v1(const char **art[],char *argv[],int *intervals,int frames,int 
     }
 }
 
-void construct_v2(const char **art[],char *argv[],int *intervals,int frames,int x,int y,int ry,int length,int lines,int start,int end,int reped,int repmin,int repmax,int round){
+static void construct_v2(const char **art[],char *argv[],int *intervals,int frames,int x,int y,int ry,int length,int lines,int start,int end,int reped,int repmin,int repmax,int round){
     int current_frame = 0,replap = randomizer(repmin,repmax);
     while(round!=0){
+        nodelay(stdscr, TRUE);
+        int ch = getch();
+        if (ch == 113 || ch == 81) {
+            endwin();
+            exit(0);
+        }
         int cnt = 0,pt1=(x+1)/2,pt2=((x+1)/2)+1,pts=3+y,ptt=pts;
         char **canvas = create_canvas(x,y+length);
-        clear();
+        erase();
         int terminal_height = LINES;
         int terminal_width = COLS;
         int px = (terminal_width-ry-length)/2;
@@ -267,7 +280,7 @@ void construct_v2(const char **art[],char *argv[],int *intervals,int frames,int 
     }
 }
 
-void construct_freestyle(char *argv[],int length,int lines,int start,int end){
+static void construct_freestyle(char *argv[],int length,int lines,int start,int end){
     int select = randomizer(0,ANIMATED_VERSION-1);
     while(1){
         if(select==0){
@@ -405,7 +418,7 @@ int main(int argc,char *argv[]){
             if(lines<=10){
                 if(lines&1)lines++;
                 int frame[1] = {75000};
-                construct_v1(momoi_static_v1,argv,frame,1,STATIC_V1_X,STATIC_V1_Y,STATIC_V1_RY,length,lines,optind+argctl,argc,-1);
+	        construct_v1(momoi_static_v1,argv,frame,1,STATIC_V1_X,STATIC_V1_Y,STATIC_V1_RY,length,lines,optind+argctl,argc,-1);
                 return 0;
             }
         }

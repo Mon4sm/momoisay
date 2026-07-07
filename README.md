@@ -67,7 +67,14 @@ repo/
 │    ├── art/
 │    │   ├── art.c
 │    │   └── art.h
-│    └── momoisay.c
+│    ├── extern/
+│    │   ├── cString.c
+│    │   └── cString.h
+│    ├── momoisay.c
+│    ├── render.c
+│    ├── render.h
+│    ├── speech.c
+│    └── speech.h
 ├── Makefile
 ├── LICENSE
 ├── preview.gif

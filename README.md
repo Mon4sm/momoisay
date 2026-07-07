@@ -2,7 +2,7 @@
 *A CLI program written in C featuring talking Saiba Momoi from Blue Archive!!!*
 
 [![License](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.1.1-green)]()
+[![Version](https://img.shields.io/badge/version-1.2.0-green)]()
 
 ---
 
@@ -48,6 +48,7 @@ momoisay <text>         # Simple Usage
 momoisay -a             # Animated Momoi with no text bubble (default version 1)
 momoisay -a <version>   # Animated Momoi with no text bubble (default version 1)
 momoisay -f             # Freestyle animations (This is pretty cool for ricing)
+momoisay -c cyan -f     # Freestyle animations (But with custom colors!!!)
 ```
 
 ## File Structure

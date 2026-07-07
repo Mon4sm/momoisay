@@ -7,6 +7,34 @@
 #include <unistd.h>
 #include <ncurses.h>
 
+static int use_color = 0;
+
+static const struct{
+    const char *name;
+    short curses_color;
+} COLOR_TABLE[COLOR_ART_COUNT] = {
+    [COLOR_DEFAULT]     = {"default", -1},
+    [COLOR_ART_RED]     = {"red",     COLOR_RED},
+    [COLOR_ART_GREEN]   = {"green",   COLOR_GREEN},
+    [COLOR_ART_YELLOW]  = {"yellow",  COLOR_YELLOW},
+    [COLOR_ART_BLUE]    = {"blue",    COLOR_BLUE},
+    [COLOR_ART_MAGENTA] = {"magenta", COLOR_MAGENTA},
+    [COLOR_ART_CYAN]    = {"cyan",    COLOR_CYAN},
+    [COLOR_ART_WHITE]   = {"white",   COLOR_WHITE},
+};
+
+const char *color_name(color c){
+    if(c >= COLOR_ART_COUNT) return "";
+    return COLOR_TABLE[c].name;
+}
+
+color to_color(const char *s){
+    for(int i=0;i<COLOR_ART_COUNT;i++){
+        if(!strcmp(s, COLOR_TABLE[i].name)) return i;
+    }
+    return COLOR_ART_COUNT;
+}
+
 int rand_between(int min, int max){
     return rand()%(max-min+1)+min;
 }
@@ -24,7 +52,7 @@ static void handle_signal(int sig){
     _exit(0);
 }
 
-void render_init(void){
+void render_init(color c){
     setlocale(LC_ALL, "");
     initscr();
     cbreak();
@@ -34,6 +62,12 @@ void render_init(void){
     nodelay(stdscr, TRUE);
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
+    if(c != COLOR_DEFAULT && has_colors()){
+        start_color();
+        use_default_colors();
+        init_pair(1, COLOR_TABLE[c].curses_color, -1);
+        use_color = 1;
+    }
 }
 
 static char **canvas_create(int rows, int cols){
@@ -127,7 +161,10 @@ void render_run(const animation *anim, const speech *sp, int rounds){
         int py = (LINES - anim->rows)/2;
         blit_frame(canvas, tpl, anim->frames[frame], anim->rows, cols);
         for(int i=0;i<anim->rows;i++){
-            mvprintw(py+i, px, "%s", canvas[i]);
+            if(use_color) attron(COLOR_PAIR(1));
+            mvprintw(py+i, px, "%.*s", anim->cols, canvas[i]);
+            if(use_color) attroff(COLOR_PAIR(1));
+            printw("%s", canvas[i]+anim->cols);
         }
         refresh();
         usleep(anim->intervals[frame]);

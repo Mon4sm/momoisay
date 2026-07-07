@@ -6,7 +6,7 @@
 #include "render.h"
 #include "speech.h"
 
-#define VERSION "1.1.1"
+#define VERSION "1.2.0"
 
 static const int STATIC_V1_INTERVALS[] = {75000};
 static const int ANIMATED_V1_INTERVALS[] = {150000, 75000, 150000, 150000, 75000};
@@ -38,7 +38,8 @@ static void help(void){
         "    -a <version> <text>                 Cool animated version of cute Momoi (default version 1)\n"
         "    -f <text>                           Freestyle Momoi animation\n"
         "    -s <version> <text>                 Display static version of cute Momoi (default version 1)\n"
-        "    -l, --list                          List available versions for Momoi ASCII arts\n"
+        "    -c, --color <name>                  Color Momoi!!! (red green yellow blue magenta cyan white)\n"
+        "    -l, --list                          List available versions for Momoi ASCII arts & color options\n"
         "    <text>                              Text that cute Momoi will say!!! (default static version 1)\n"
     );
 }
@@ -54,6 +55,9 @@ static void list(void){
     printf("\n");
     printf("animated: ");
     for(int i=1;i<=ANIMATED_COUNT;i++) printf("%d ", i);
+    printf("\n");
+    printf("colors: ");
+    for(int i=1;i<COLOR_ART_COUNT;i++) printf("%s ", color_name(i));
     printf("\n");
 }
 
@@ -113,15 +117,17 @@ int main(int argc, char *argv[]){
     int argctl = 0;
     int animated_version = 1;
     int static_version = 1;
+    color art_color = COLOR_DEFAULT;
 
     struct option long_options[] = {
         {"help", no_argument, NULL, 'h'},
         {"version", no_argument, NULL, 'v'},
         {"list", no_argument, NULL, 'l'},
+        {"color", required_argument, NULL, 'c'},
         {NULL, 0, NULL, 0}
     };
 
-    while((option = getopt_long(argc, argv, "hvla::s::f::", long_options, NULL))!=-1){
+    while((option = getopt_long(argc, argv, "hvlc:a::s::f::", long_options, NULL))!=-1){
         switch(option){
             case 'h':
                 help();
@@ -132,6 +138,13 @@ int main(int argc, char *argv[]){
             case 'l':
                 list();
                 return 0;
+            case 'c':
+                art_color = to_color(optarg);
+                if(art_color == COLOR_ART_COUNT){
+                    fprintf(stderr, "momoisay: unknown color '%s' (red green yellow blue magenta cyan white)\n", optarg);
+                    return 1;
+                }
+                break;
             case 'a':
                 mode = MODE_ANIMATED;
                 parse_version_arg(argc, argv, ANIMATED_COUNT, &animated_version, &ctl, &argctl);
@@ -177,7 +190,7 @@ int main(int argc, char *argv[]){
         return 1;
     }
 
-    render_init();
+    render_init(art_color);
     if(mode==MODE_FREESTYLE){
         freestyle(sp);
     }

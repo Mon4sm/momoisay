@@ -1,4 +1,4 @@
-CC = gcc
+CC ?= gcc
 CFLAGS = -O2 -Wall
 LDFLAGS = -lncursesw
 SOURCES = src/momoisay.c src/art/art.c src/render.c src/speech.c src/extern/cString.c

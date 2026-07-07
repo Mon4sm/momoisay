@@ -31,7 +31,7 @@ void render_init(void){
     noecho();
     keypad(stdscr, TRUE);
     curs_set(0);
-    timeout(-1);
+    nodelay(stdscr, TRUE);
     signal(SIGINT, handle_signal);
     signal(SIGTERM, handle_signal);
 }
@@ -117,7 +117,12 @@ void render_run(const animation *anim, const speech *sp, int rounds){
     int frame = 0, replap = 0;
     if(loop->rep_frame >= 0) replap = rand_between(loop->rep_min, loop->rep_max);
     while(rounds != 0){
-        clear();
+        int ch = getch();
+        if(ch=='q' || ch=='Q'){
+            endwin();
+            exit(0);
+        }
+        erase();
         int px = (COLS - anim->view_cols - sp->width)/2;
         int py = (LINES - anim->rows)/2;
         blit_frame(canvas, tpl, anim->frames[frame], anim->rows, cols);
